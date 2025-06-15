@@ -2,12 +2,13 @@
 import { useState, useEffect } from 'react';
 import { useConsole } from '@/hooks/useConsole';
 import { supabase } from '@/lib/supabase';
-import { Database, Check, AlertCircle } from 'lucide-react';
+import { Database } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const GloriaTab = () => {
   const [restaurantKey, setRestaurantKey] = useState('w9p03u55Nf5BZmGllx');
   const [isLoading, setIsLoading] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [showSnippet, setShowSnippet] = useState(false);
   const { addLog } = useConsole();
 
   useEffect(() => {
@@ -22,9 +23,28 @@ export const GloriaTab = () => {
       }
     };
 
+    // Listen for show snippet events from console
+    const handleShowSnippet = (event: CustomEvent) => {
+      if (event.detail.tab === 'gloria') {
+        setShowSnippet(true);
+      }
+    };
+
+    // Listen for fetch data events from console
+    const handleFetchData = (event: CustomEvent) => {
+      if (event.detail.tab === 'gloria') {
+        fetchGloriaData();
+      }
+    };
+
     window.addEventListener('testConnection', handleTestConnection as EventListener);
+    window.addEventListener('showSnippet', handleShowSnippet as EventListener);
+    window.addEventListener('fetchData', handleFetchData as EventListener);
+    
     return () => {
       window.removeEventListener('testConnection', handleTestConnection as EventListener);
+      window.removeEventListener('showSnippet', handleShowSnippet as EventListener);
+      window.removeEventListener('fetchData', handleFetchData as EventListener);
     };
   }, []);
 
@@ -38,9 +58,38 @@ export const GloriaTab = () => {
     autoSave('RESTAURANT_KEY', value);
   };
 
+  const fetchGloriaData = async () => {
+    addLog('Fetching Gloria menu data...', 'info');
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('gloria-api', {
+        body: { 
+          restaurantKey,
+          endpoint: 'menu'
+        }
+      });
+
+      if (error) {
+        addLog(`Fetch error: ${error.message}`, 'error');
+        return;
+      }
+
+      if (data?.success) {
+        addLog('Menu data fetched successfully!', 'success');
+        if (data.data) {
+          const preview = data.data.length > 500 ? `${data.data.substring(0, 500)}...` : data.data;
+          addLog(`Menu XML preview: ${preview}`, 'info');
+        }
+      } else {
+        addLog(`Fetch failed: ${data?.error || 'Unknown error'}`, 'error');
+      }
+    } catch (error) {
+      addLog(`Fetch error: ${error.message}`, 'error');
+    }
+  };
+
   const testGloriaConnection = async () => {
     setIsLoading(true);
-    setConnectionStatus('idle');
     addLog('Testing Gloria connection via Edge Function...', 'info');
     
     try {
@@ -59,7 +108,6 @@ export const GloriaTab = () => {
         addLog(`Edge Function error: ${error.message}`, 'error');
         addLog(`Error details: ${JSON.stringify(error)}`, 'error');
         console.error('Edge function error details:', error);
-        setConnectionStatus('error');
         
         // Additional error details for debugging
         if (error.context) {
@@ -78,7 +126,6 @@ export const GloriaTab = () => {
           const preview = data.data.length > 200 ? `${data.data.substring(0, 200)}...` : data.data;
           addLog(`XML data preview: ${preview}`, 'info');
         }
-        setConnectionStatus('success');
       } else {
         addLog(`Gloria API error: ${data?.error || 'Unknown error'}`, 'error');
         if (data?.data) {
@@ -88,12 +135,10 @@ export const GloriaTab = () => {
           addLog(`Error details: ${JSON.stringify(data.details)}`, 'error');
           console.error('Error details:', data.details);
         }
-        setConnectionStatus('error');
       }
     } catch (error) {
       console.error('Catch block error:', error);
       addLog(`Connection error: ${error.message}`, 'error');
-      setConnectionStatus('error');
       
       // Enhanced error logging for debugging
       addLog(`Error type: ${error.name}`, 'error');
@@ -113,83 +158,79 @@ export const GloriaTab = () => {
     }
   };
 
-  const getStatusIcon = () => {
-    switch (connectionStatus) {
-      case 'success':
-        return <Check className="w-4 h-4 text-green-600" />;
-      case 'error':
-        return <AlertCircle className="w-4 h-4 text-red-500" />;
-      default:
-        return <Database className="w-4 h-4 text-gray-400" />;
-    }
-  };
-
-  const getStatusColor = () => {
-    switch (connectionStatus) {
-      case 'success':
-        return 'border-green-200 bg-green-50';
-      case 'error':
-        return 'border-red-200 bg-red-50';
-      default:
-        return 'border-gray-200 bg-white';
-    }
-  };
-
   return (
     <div className="space-y-6">
-      {/* Connection Status */}
-      <div className={`rounded-lg border p-4 ${getStatusColor()}`}>
-        <div className="flex items-center space-x-3">
-          {getStatusIcon()}
-          <div>
-            <h3 className="text-sm font-medium text-gray-900">
-              Connection Status
-            </h3>
-            <p className="text-sm text-gray-600">
-              {connectionStatus === 'idle' ? 'Not tested' : connectionStatus === 'success' ? 'Connected' : 'Failed'}
-              {isLoading && ' - Testing...'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Environment Variables */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <span className="font-bold text-green-600">GloriaFood</span>
-          <h2 className="text-lg font-semibold text-green-600">Environment Variables</h2>
-        </div>
+      <Tabs defaultValue="environment" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="environment">Environment Variables</TabsTrigger>
+          <TabsTrigger value="menus">Menus</TabsTrigger>
+          <TabsTrigger value="categories">Categories</TabsTrigger>
+        </TabsList>
         
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Restaurant Key
-          </label>
-          <input
-            type="text"
-            value={restaurantKey}
-            onChange={(e) => handleRestaurantKeyChange(e.target.value)}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
-            placeholder="Enter Gloria Restaurant Key"
-          />
-        </div>
-      </div>
+        <TabsContent value="environment" className="space-y-6">
+          {/* Environment Variables */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <span className="font-bold text-green-600">GloriaFood</span>
+              <h2 className="text-lg font-semibold text-green-600">Environment Variables</h2>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Restaurant Key
+              </label>
+              <input
+                type="text"
+                value={restaurantKey}
+                onChange={(e) => handleRestaurantKeyChange(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                placeholder="Enter Gloria Restaurant Key"
+              />
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="menus" className="space-y-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-green-600 mb-4">Menu Management</h2>
+            <p className="text-gray-600">Menu management features will be implemented here.</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="categories" className="space-y-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <h2 className="text-lg font-semibold text-green-600 mb-4">Category Management</h2>
+            <p className="text-gray-600">Category management features will be implemented here.</p>
+          </div>
+        </TabsContent>
+      </Tabs>
 
-      {/* Gloria API Test Snippet */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-green-600 mb-4 flex items-center space-x-2">
-          <Database className="w-5 h-5" />
-          <span>Gloria Fetch Menu Snippet</span>
-        </h3>
-        <div className="bg-gray-900 rounded-md p-4 overflow-x-auto">
-          <pre className="text-green-400 text-sm">
-            <code>{`curl "https://pos.globalfoodsoft.com/pos/menu" \\
+      {/* Gloria API Test Snippet - Only show when snippet button is clicked */}
+      {showSnippet && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-green-600 flex items-center space-x-2">
+              <Database className="w-5 h-5" />
+              <span>Gloria Fetch Menu Snippet</span>
+            </h3>
+            <button 
+              onClick={() => setShowSnippet(false)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="bg-gray-900 rounded-md p-4 overflow-x-auto">
+            <pre className="text-green-400 text-sm">
+              <code>{`curl "https://pos.globalfoodsoft.com/pos/menu" \\
    -X GET \\
    -H "Authorization: ${restaurantKey}" \\
    -H "Accept: application/xml" \\
    -H "Glf-Api-Version: 2"`}</code>
-          </pre>
+            </pre>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

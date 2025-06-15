@@ -1,6 +1,6 @@
 
 import { useConsole } from '@/hooks/useConsole';
-import { Bot, Database, ExternalLink, TestTube } from 'lucide-react';
+import { Bot, Database, ExternalLink, TestTube, Code, Download } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 interface ConsoleProps {
@@ -45,6 +45,20 @@ export const Console = ({
     window.dispatchEvent(event);
   };
 
+  const handleShowSnippet = () => {
+    // Dispatch a custom event to show snippet cards
+    const event = new CustomEvent('showSnippet', { detail: { tab: activeTab } });
+    window.dispatchEvent(event);
+    addLog(`Displaying ${activeTab} snippet cards...`, 'info');
+  };
+
+  const handleFetchData = () => {
+    // Dispatch a custom event to fetch data for the active tab
+    const event = new CustomEvent('fetchData', { detail: { tab: activeTab } });
+    window.dispatchEvent(event);
+    addLog(`Fetching ${activeTab} data...`, 'info');
+  };
+
   return (
     <div className="h-1/3 bg-gray-900 border-t border-gray-300">
       <div className="flex justify-between items-center p-3 bg-gray-800 border-b border-gray-700">
@@ -61,6 +75,20 @@ export const Console = ({
           </div>
         </div>
         <div className="flex items-center space-x-2">
+          <button 
+            onClick={handleShowSnippet}
+            className="flex items-center space-x-1 px-3 py-1 text-white text-xs font-medium rounded transition-colors bg-purple-500 hover:bg-purple-600"
+          >
+            <Code className="w-3 h-3" />
+            <span>SNIPPET</span>
+          </button>
+          <button 
+            onClick={handleFetchData}
+            className="flex items-center space-x-1 px-3 py-1 text-white text-xs font-medium rounded transition-colors bg-indigo-500 hover:bg-indigo-600"
+          >
+            <Download className="w-3 h-3" />
+            <span>FETCH</span>
+          </button>
           <button 
             onClick={handleTestConnection}
             className="flex items-center space-x-1 px-3 py-1 text-white text-xs font-medium rounded transition-colors bg-blue-500 hover:bg-blue-600"

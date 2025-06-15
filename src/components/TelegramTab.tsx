@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useConsole } from '@/hooks/useConsole';
-import { Bot, MessageCircle, Settings, Globe, Webhook, Shield, Check, AlertCircle } from 'lucide-react';
+import { Bot, MessageCircle, Settings, Globe, Webhook, Shield } from 'lucide-react';
 
 export const TelegramTab = () => {
   const [botToken, setBotToken] = useState('');
@@ -12,7 +12,7 @@ export const TelegramTab = () => {
   const [privateChannelExistingUser, setPrivateChannelExistingUser] = useState('');
   const [apiUrl, setApiUrl] = useState('https://api.telegram.org');
   const [isLoading, setIsLoading] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [showSnippet, setShowSnippet] = useState(false);
   const { addLog } = useConsole();
 
   // Load saved values on component mount
@@ -42,9 +42,28 @@ export const TelegramTab = () => {
       }
     };
 
+    // Listen for show snippet events from console
+    const handleShowSnippet = (event: CustomEvent) => {
+      if (event.detail.tab === 'telegram') {
+        setShowSnippet(true);
+      }
+    };
+
+    // Listen for fetch data events from console
+    const handleFetchData = (event: CustomEvent) => {
+      if (event.detail.tab === 'telegram') {
+        fetchTelegramData();
+      }
+    };
+
     window.addEventListener('testConnection', handleTestConnection as EventListener);
+    window.addEventListener('showSnippet', handleShowSnippet as EventListener);
+    window.addEventListener('fetchData', handleFetchData as EventListener);
+    
     return () => {
       window.removeEventListener('testConnection', handleTestConnection as EventListener);
+      window.removeEventListener('showSnippet', handleShowSnippet as EventListener);
+      window.removeEventListener('fetchData', handleFetchData as EventListener);
     };
   }, []);
 
@@ -93,15 +112,38 @@ export const TelegramTab = () => {
     autoSave('TELEGRAM_API_URL', value);
   };
 
+  const fetchTelegramData = async () => {
+    if (!botToken) {
+      addLog('❌ Bot token is required for fetching data', 'error');
+      return;
+    }
+
+    addLog('🔄 Fetching Telegram bot data...', 'info');
+    
+    try {
+      const getMeUrl = `${apiUrl}/bot${botToken}/getMe`;
+      const response = await fetch(getMeUrl);
+      const data = await response.json();
+
+      if (response.ok && data.ok) {
+        addLog('✅ Bot data fetched successfully!', 'success');
+        addLog(`🤖 Bot: ${data.result.first_name} (@${data.result.username})`, 'info');
+        addLog(`🆔 Bot ID: ${data.result.id}`, 'info');
+      } else {
+        addLog(`❌ Failed to fetch bot data: ${data.description}`, 'error');
+      }
+    } catch (error) {
+      addLog(`💥 Fetch error: ${error.message}`, 'error');
+    }
+  };
+
   const testTelegramConnection = async () => {
     if (!botToken) {
       addLog('❌ Bot token is required for testing', 'error');
-      setConnectionStatus('error');
       return;
     }
 
     setIsLoading(true);
-    setConnectionStatus('idle');
     addLog('🔄 Testing Telegram Bot API connection...', 'info');
     
     try {
@@ -128,17 +170,14 @@ export const TelegramTab = () => {
         addLog(`👥 Can join groups: ${data.result.can_join_groups}`, 'info');
         addLog(`📨 Can read all group messages: ${data.result.can_read_all_group_messages}`, 'info');
         addLog(`🔍 Supports inline queries: ${data.result.supports_inline_queries}`, 'info');
-        setConnectionStatus('success');
       } else {
         addLog(`❌ Telegram API error: ${data.description || 'Unknown error'}`, 'error');
         addLog(`🔢 Error code: ${data.error_code || 'N/A'}`, 'error');
-        setConnectionStatus('error');
       }
     } catch (error) {
       console.error('Telegram connection error:', error);
       addLog(`💥 Connection error: ${error.message}`, 'error');
       addLog(`⚠️ Error type: ${error.name}`, 'error');
-      setConnectionStatus('error');
       
       if (error.message.includes('Failed to fetch')) {
         addLog('🌐 Network error detected. Check your internet connection and bot token.', 'warning');
@@ -151,46 +190,8 @@ export const TelegramTab = () => {
     }
   };
 
-  const getStatusIcon = () => {
-    switch (connectionStatus) {
-      case 'success':
-        return <Check className="w-4 h-4 text-green-600" />;
-      case 'error':
-        return <AlertCircle className="w-4 h-4 text-red-500" />;
-      default:
-        return <Bot className="w-4 h-4 text-gray-400" />;
-    }
-  };
-
-  const getStatusColor = () => {
-    switch (connectionStatus) {
-      case 'success':
-        return 'border-green-200 bg-green-50';
-      case 'error':
-        return 'border-red-200 bg-red-50';
-      default:
-        return 'border-gray-200 bg-white';
-    }
-  };
-
   return (
     <div className="space-y-6">
-      {/* Connection Status */}
-      <div className={`rounded-lg border p-4 ${getStatusColor()}`}>
-        <div className="flex items-center space-x-3">
-          {getStatusIcon()}
-          <div>
-            <h3 className="text-sm font-medium text-gray-900">
-              Connection Status
-            </h3>
-            <p className="text-sm text-gray-600">
-              {connectionStatus === 'idle' ? 'Not tested' : connectionStatus === 'success' ? 'Connected' : 'Failed'}
-              {isLoading && ' - Testing...'}
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Bot Configuration */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -211,7 +212,7 @@ export const TelegramTab = () => {
                 type="password"
                 value={botToken}
                 onChange={(e) => handleBotTokenChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 placeholder="Enter Telegram Bot Token (from @BotFather)"
               />
             </div>
@@ -227,7 +228,7 @@ export const TelegramTab = () => {
                 type="text"
                 value={botUsername}
                 onChange={(e) => handleBotUsernameChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 placeholder="@your_bot_username"
               />
             </div>
@@ -243,7 +244,7 @@ export const TelegramTab = () => {
                 type="text"
                 value={botDomain}
                 onChange={(e) => handleBotDomainChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 placeholder="your-domain.com"
               />
             </div>
@@ -259,7 +260,7 @@ export const TelegramTab = () => {
                 type="url"
                 value={botWebappUrl}
                 onChange={(e) => handleBotWebappUrlChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 placeholder="https://your-webapp-url.com"
               />
             </div>
@@ -282,7 +283,7 @@ export const TelegramTab = () => {
                 type="text"
                 value={privateChannelNewOrder}
                 onChange={(e) => handlePrivateChannelNewOrderChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 placeholder="@new_orders_channel or -1001234567890"
               />
             </div>
@@ -295,7 +296,7 @@ export const TelegramTab = () => {
                 type="text"
                 value={privateChannelCompletedOrders}
                 onChange={(e) => handlePrivateChannelCompletedOrdersChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 placeholder="@completed_orders_channel or -1001234567890"
               />
             </div>
@@ -308,7 +309,7 @@ export const TelegramTab = () => {
                 type="text"
                 value={privateChannelExistingUser}
                 onChange={(e) => handlePrivateChannelExistingUserChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 placeholder="@existing_users_channel or -1001234567890"
               />
             </div>
@@ -324,7 +325,7 @@ export const TelegramTab = () => {
                 type="url"
                 value={apiUrl}
                 onChange={(e) => handleApiUrlChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 placeholder="https://api.telegram.org"
               />
             </div>
@@ -332,20 +333,30 @@ export const TelegramTab = () => {
         </div>
       </div>
 
-      {/* API Test Snippet */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-green-600 mb-4 flex items-center space-x-2">
-          <Bot className="w-5 h-5" />
-          <span>Telegram API Test Snippet</span>
-        </h3>
-        <div className="bg-gray-900 rounded-md p-4 overflow-x-auto">
-          <pre className="text-green-400 text-sm">
-            <code>{`curl "${apiUrl}/bot${botToken || '{BOT_TOKEN}'}/getMe" \\
+      {/* API Test Snippet - Only show when snippet button is clicked */}
+      {showSnippet && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-green-600 flex items-center space-x-2">
+              <Bot className="w-5 h-5" />
+              <span>Telegram API Test Snippet</span>
+            </h3>
+            <button 
+              onClick={() => setShowSnippet(false)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
+          </div>
+          <div className="bg-gray-900 rounded-md p-4 overflow-x-auto">
+            <pre className="text-green-400 text-sm">
+              <code>{`curl "${apiUrl}/bot${botToken || '{BOT_TOKEN}'}/getMe" \\
    -X GET \\
    -H "Content-Type: application/json"`}</code>
-          </pre>
+            </pre>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
