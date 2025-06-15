@@ -46,17 +46,25 @@ export const Console = ({
   };
 
   const handleShowSnippet = () => {
-    // Dispatch a custom event to show snippet cards
-    const event = new CustomEvent('showSnippet', { detail: { tab: activeTab } });
-    window.dispatchEvent(event);
-    addLog(`Displaying ${activeTab} snippet cards...`, 'info');
+    // Only show snippet for telegram tab now
+    if (activeTab === 'telegram') {
+      const event = new CustomEvent('showSnippet', { detail: { tab: activeTab } });
+      window.dispatchEvent(event);
+      addLog(`Displaying ${activeTab} snippet cards...`, 'info');
+    } else {
+      addLog('Snippet button is only available for Telegram tab', 'warning');
+    }
   };
 
   const handleFetchData = () => {
-    // Dispatch a custom event to fetch data for the active tab
-    const event = new CustomEvent('fetchData', { detail: { tab: activeTab } });
-    window.dispatchEvent(event);
-    addLog(`Fetching ${activeTab} data...`, 'info');
+    // Only fetch data for gloria tab now
+    if (activeTab === 'gloria') {
+      const event = new CustomEvent('fetchData', { detail: { tab: activeTab } });
+      window.dispatchEvent(event);
+      addLog('Fetching GloriaFood menu data...', 'info');
+    } else {
+      addLog('Fetch button is only available for GloriaFood tab', 'warning');
+    }
   };
 
   return (
@@ -78,6 +86,7 @@ export const Console = ({
           <button 
             onClick={handleShowSnippet}
             className="flex items-center space-x-1 px-3 py-1 text-white text-xs font-medium rounded transition-colors bg-purple-500 hover:bg-purple-600"
+            disabled={activeTab !== 'telegram'}
           >
             <Code className="w-3 h-3" />
             <span>SNIPPET</span>
@@ -85,6 +94,7 @@ export const Console = ({
           <button 
             onClick={handleFetchData}
             className="flex items-center space-x-1 px-3 py-1 text-white text-xs font-medium rounded transition-colors bg-indigo-500 hover:bg-indigo-600"
+            disabled={activeTab !== 'gloria'}
           >
             <Download className="w-3 h-3" />
             <span>FETCH</span>
