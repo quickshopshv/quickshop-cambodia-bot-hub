@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useConsole } from '@/hooks/useConsole';
 import { supabase } from '@/lib/supabase';
@@ -135,11 +134,11 @@ export const GloriaTab = () => {
 
   return (
     <div className="space-y-6">
-      {/* GloriaFood Fetch Menu Snippet */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex justify-between items-center mb-4">
+      {/* Isolated Execute Button */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold text-green-600">
-            GloriaFood Fetch Menu Snippet
+            GloriaFood Menu Control
           </h3>
           <Button 
             onClick={executeSnippet}
@@ -151,19 +150,26 @@ export const GloriaTab = () => {
           </Button>
         </div>
         
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="restaurant-key" className="block text-sm font-medium text-gray-700 mb-1">
-              Restaurant Key
-            </Label>
-            <Input
-              id="restaurant-key"
-              type="text"
-              value={restaurantKey}
-              onChange={(e) => handleRestaurantKeyChange(e.target.value)}
-              placeholder="Enter Gloria Restaurant Key"
-            />
-          </div>
+        <div className="mt-4">
+          <Label htmlFor="restaurant-key" className="block text-sm font-medium text-gray-700 mb-1">
+            Restaurant Key
+          </Label>
+          <Input
+            id="restaurant-key"
+            type="text"
+            value={restaurantKey}
+            onChange={(e) => handleRestaurantKeyChange(e.target.value)}
+            placeholder="Enter Gloria Restaurant Key"
+          />
+        </div>
+      </div>
+
+      {/* GloriaFood Fetch Menu Snippet - Hidden when categories are displayed */}
+      {categories.length === 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-green-600 mb-4">
+            GloriaFood API Snippet
+          </h3>
           
           <div className="bg-gray-900 rounded-md p-4 overflow-x-auto">
             <pre className="text-green-400 text-sm">
@@ -175,19 +181,19 @@ export const GloriaTab = () => {
             </pre>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Categories Tree */}
+      {/* Categories in Single Column */}
       {categories.length > 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-green-600 mb-4">Menu Categories</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="space-y-2">
             {categories.map((category, index) => (
               <Button
                 key={index}
                 variant={category.enabled ? "default" : "outline"}
                 onClick={() => toggleCategory(index)}
-                className={`justify-start ${
+                className={`w-full justify-start ${
                   category.enabled 
                     ? 'bg-green-500 hover:bg-green-600 text-white' 
                     : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
