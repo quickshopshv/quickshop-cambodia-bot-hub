@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -92,5 +93,16 @@ export default {
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [require("tailwindcss-animate"), require("daisyui")],
+	daisyui: {
+		themes: ["dark"],
+		darkTheme: "dark",
+		base: true,
+		styled: true,
+		utils: true,
+		logs: true,
+		rtl: false,
+		prefix: "",
+		themeRoot: ":root",
+	}
 } satisfies Config;
