@@ -1,7 +1,8 @@
 
 import { useConsole } from '@/hooks/useConsole';
-import { Bot, Database, ExternalLink, TestTube, Code, Download } from 'lucide-react';
+import { Bot, Database, ExternalLink, TestTube, Code, Download, Minimize } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useState } from 'react';
 
 interface ConsoleProps {
   activeTab: string;
@@ -17,6 +18,8 @@ export const Console = ({
     clearLogs,
     addLog
   } = useConsole();
+
+  const [isMinimized, setIsMinimized] = useState(false);
 
   const fetchEdgeFunctionLogs = async () => {
     addLog('Fetching Edge Function logs...', 'info');
@@ -68,7 +71,7 @@ export const Console = ({
   };
 
   return (
-    <div className="h-1/3 bg-gray-900 border-t border-gray-300">
+    <div className={`bg-gray-900 border-t border-gray-300 ${isMinimized ? 'h-auto' : 'h-1/3'}`}>
       <div className="flex justify-between items-center p-3 bg-gray-800 border-b border-gray-700">
         <div className="flex items-center space-x-4">
           <h3 className="text-green-400 font-semibold text-sm">CONSOLE</h3>
@@ -116,13 +119,22 @@ export const Console = ({
           <button onClick={clearLogs} className="px-3 py-1 text-white text-xs font-medium rounded transition-colors bg-amber-500 hover:bg-amber-400">
             CLEAR
           </button>
+          <button 
+            onClick={() => setIsMinimized(!isMinimized)}
+            className="flex items-center space-x-1 px-3 py-1 text-white text-xs font-medium rounded transition-colors bg-gray-600 hover:bg-gray-500"
+          >
+            <Minimize className="w-3 h-3" />
+            <span>{isMinimized ? 'SHOW' : 'HIDE'}</span>
+          </button>
         </div>
       </div>
-      <div className="h-full p-4 overflow-y-auto font-mono text-sm">
-        {logs.length === 0 ? <div className="text-gray-500">Console ready...</div> : logs.map((log, index) => <div key={index} className={`mb-1 ${log.type === 'error' ? 'text-red-400' : log.type === 'success' ? 'text-green-400' : log.type === 'warning' ? 'text-yellow-400' : 'text-white'}`}>
-              <span className="text-gray-400">[{log.timestamp}]</span> {log.message}
-            </div>)}
-      </div>
+      {!isMinimized && (
+        <div className="h-full p-4 overflow-y-auto font-mono text-sm">
+          {logs.length === 0 ? <div className="text-gray-500">Console ready...</div> : logs.map((log, index) => <div key={index} className={`mb-1 ${log.type === 'error' ? 'text-red-400' : log.type === 'success' ? 'text-green-400' : log.type === 'warning' ? 'text-yellow-400' : 'text-white'}`}>
+                <span className="text-gray-400">[{log.timestamp}]</span> {log.message}
+              </div>)}
+        </div>
+      )}
     </div>
   );
 };
