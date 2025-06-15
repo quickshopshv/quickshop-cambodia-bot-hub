@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useConsole } from '@/hooks/useConsole';
 import { ExternalLink } from 'lucide-react';
 
@@ -10,6 +10,19 @@ export const TelegramTab = () => {
   const [apiUrl, setApiUrl] = useState('https://api.telegram.org');
   const [isLoading, setIsLoading] = useState(false);
   const { addLog } = useConsole();
+
+  // Load saved values on component mount
+  useEffect(() => {
+    const savedBotToken = localStorage.getItem('BOT_TOKEN') || '';
+    const savedChatId = localStorage.getItem('CHAT_ID') || '';
+    const savedWebhookUrl = localStorage.getItem('WEBHOOK_URL') || '';
+    const savedApiUrl = localStorage.getItem('TELEGRAM_API_URL') || 'https://api.telegram.org';
+    
+    setBotToken(savedBotToken);
+    setChatId(savedChatId);
+    setWebhookUrl(savedWebhookUrl);
+    setApiUrl(savedApiUrl);
+  }, []);
 
   const saveTelegramVariables = () => {
     localStorage.setItem('BOT_TOKEN', botToken);
