@@ -228,6 +228,8 @@ export const GloriaTab = () => {
           </Button>
         </div>
         
+        {/* Restaurant Key Block - Commented out */}
+        {/*
         <div className="mt-4">
           <Label htmlFor="restaurant-key" className="block text-sm font-medium text-gray-700 mb-1">
             Restaurant Key
@@ -240,6 +242,7 @@ export const GloriaTab = () => {
             placeholder="Enter Gloria Restaurant Key"
           />
         </div>
+        */}
       </div>
 
       {/* GloriaFood Fetch Menu Snippet - Hidden when data is displayed */}
