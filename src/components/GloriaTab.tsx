@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { useConsole } from '@/hooks/useConsole';
+import { supabase } from '@/lib/supabase';
 
 export const GloriaTab = () => {
   const [restaurantKey, setRestaurantKey] = useState('w9p03u55Nf5BZmGllx');
@@ -9,27 +10,33 @@ export const GloriaTab = () => {
 
   const testGloriaConnection = async () => {
     setIsLoading(true);
-    addLog('Testing Gloria connection...', 'info');
+    addLog('Testing Gloria connection via Edge Function...', 'info');
     
     try {
-      const response = await fetch('https://pos.globalfoodsoft.com/pos/menu', {
-        method: 'GET',
-        headers: {
-          'Authorization': restaurantKey,
-          'Accept': 'application/xml',
-          'Glf-Api-Version': '2'
+      const { data, error } = await supabase.functions.invoke('gloria-api', {
+        body: { 
+          restaurantKey,
+          endpoint: 'menu'
         }
       });
 
-      if (response.ok) {
-        const data = await response.text();
+      if (error) {
+        addLog(`Edge Function error: ${error.message}`, 'error');
+        return;
+      }
+
+      if (data.success) {
         addLog('Gloria connection successful!', 'success');
-        addLog(`Response: ${data.substring(0, 200)}...`, 'info');
+        addLog(`Response status: ${data.status}`, 'info');
+        addLog(`XML data preview: ${data.data.substring(0, 200)}...`, 'info');
       } else {
-        addLog(`Gloria connection failed: ${response.status} ${response.statusText}`, 'error');
+        addLog(`Gloria API error: ${data.error}`, 'error');
+        if (data.data) {
+          addLog(`Response data: ${data.data}`, 'warning');
+        }
       }
     } catch (error) {
-      addLog(`Gloria connection error: ${error}`, 'error');
+      addLog(`Connection error: ${error}`, 'error');
     } finally {
       setIsLoading(false);
     }
