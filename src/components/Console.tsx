@@ -18,9 +18,13 @@ export const Console = ({
         <div className="flex items-center space-x-4">
           <h3 className="text-green-400 font-semibold text-sm">CONSOLE</h3>
           <div className="flex space-x-2">
-            <button onClick={() => setActiveTab('gloria')} className={`flex items-center space-x-1 px-3 py-1 rounded text-xs font-medium transition-colors ${activeTab === 'gloria' ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
-              <Database className="w-3 h-3" />
-              <span>GLORIA</span>
+            <button onClick={() => setActiveTab('gloria')} className={`flex items-center space-x-2 px-3 py-1 rounded text-xs font-medium transition-colors ${activeTab === 'gloria' ? 'bg-white text-gray-900' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
+              <img 
+                src="/lovable-uploads/6ffb111a-54d7-4c4e-be37-6d3e627f675f.png" 
+                alt="GloriaFood" 
+                className="w-3 h-3 object-contain"
+              />
+              <span className="font-bold">GloriaFood</span>
             </button>
             <button onClick={() => setActiveTab('telegram')} className={`flex items-center space-x-1 px-3 py-1 rounded text-xs font-medium transition-colors ${activeTab === 'telegram' ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
               <Bot className="w-3 h-3" />
