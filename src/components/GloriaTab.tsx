@@ -67,11 +67,42 @@ export const GloriaTab = () => {
       if (data?.success && data.data) {
         addLog('Menu data fetched successfully!', 'success');
         
+        // Log the first 1000 characters of the XML to see its structure
+        addLog(`XML Preview: ${data.data.substring(0, 1000)}...`, 'info');
+        
         // Parse XML to extract categories
         try {
           const parser = new DOMParser();
           const xmlDoc = parser.parseFromString(data.data, "text/xml");
-          const categoryElements = xmlDoc.getElementsByTagName('category');
+          
+          // Check if there are any parsing errors
+          const parseError = xmlDoc.querySelector('parsererror');
+          if (parseError) {
+            addLog(`XML Parse Error: ${parseError.textContent}`, 'error');
+            return;
+          }
+          
+          // Try different possible category element names
+          let categoryElements = xmlDoc.getElementsByTagName('category');
+          addLog(`Found ${categoryElements.length} 'category' elements`, 'info');
+          
+          if (categoryElements.length === 0) {
+            // Try alternative tag names
+            categoryElements = xmlDoc.getElementsByTagName('Category');
+            addLog(`Found ${categoryElements.length} 'Category' elements (capitalized)`, 'info');
+          }
+          
+          if (categoryElements.length === 0) {
+            // Try to find any elements with 'name' attribute
+            const allElements = xmlDoc.getElementsByTagName('*');
+            const elementsWithName = [];
+            for (let i = 0; i < allElements.length; i++) {
+              if (allElements[i].getAttribute('name')) {
+                elementsWithName.push(allElements[i].tagName);
+              }
+            }
+            addLog(`Elements with 'name' attribute: ${elementsWithName.join(', ')}`, 'info');
+          }
           
           const extractedCategories: Category[] = [];
           for (let i = 0; i < categoryElements.length; i++) {
