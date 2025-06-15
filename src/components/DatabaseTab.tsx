@@ -1,106 +1,91 @@
 
+import { useState } from 'react';
 import { useConsole } from '@/hooks/useConsole';
+import { supabase } from '@/integrations/supabase/client';
 
 export const DatabaseTab = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const { addLog } = useConsole();
 
-  const openSupabaseDashboard = () => {
-    addLog('Opening Supabase dashboard...', 'info');
-    window.open('https://supabase.com/dashboard', '_blank');
+  const testDatabaseConnection = async () => {
+    setIsLoading(true);
+    addLog('Testing Supabase database connection...', 'info');
+    
+    try {
+      const { data, error } = await supabase.from('users').select('count').limit(1);
+      
+      if (error) {
+        addLog(`Database error: ${error.message}`, 'error');
+      } else {
+        addLog('Database connection successful!', 'success');
+        addLog(`Connected to Supabase database`, 'info');
+      }
+    } catch (error) {
+      addLog(`Connection error: ${error}`, 'error');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const openTableEditor = () => {
-    addLog('Opening table editor...', 'info');
-    // This would open the specific Supabase table editor
-    window.open('https://supabase.com/dashboard/project/[PROJECT_ID]/editor', '_blank');
+  const checkTables = async () => {
+    setIsLoading(true);
+    addLog('Checking database tables...', 'info');
+    
+    try {
+      // Check users table
+      const { error: usersError } = await supabase.from('users').select('count').limit(1);
+      if (usersError) {
+        addLog(`Users table: ${usersError.message}`, 'warning');
+      } else {
+        addLog('Users table: OK', 'success');
+      }
+
+      // Check menu_cache table
+      const { error: menuError } = await supabase.from('menu_cache').select('count').limit(1);
+      if (menuError) {
+        addLog(`Menu cache table: ${menuError.message}`, 'warning');
+      } else {
+        addLog('Menu cache table: OK', 'success');
+      }
+    } catch (error) {
+      addLog(`Table check error: ${error}`, 'error');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="space-y-6">
       <div className="card bg-base-200 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title text-lime-400">DATABASE ENVIRONMENT VARIABLES</h2>
+          <h2 className="card-title text-lime-400">DATABASE MANAGEMENT</h2>
           
-          <div className="grid grid-cols-1 gap-4">
-            <div className="alert alert-info">
-              <span>Database is connected via Supabase integration. Use the shortcuts below to manage your database.</span>
+          <div className="stats stats-vertical lg:stats-horizontal shadow">
+            <div className="stat">
+              <div className="stat-title">Project ID</div>
+              <div className="stat-value text-sm">fxhtcdyxmtfyvanqhaty</div>
             </div>
-
-            <div className="card-actions justify-center space-x-2">
-              <button 
-                className="btn btn-primary bg-lime-600 border-lime-600 hover:bg-lime-700"
-                onClick={openSupabaseDashboard}
-              >
-                SUPABASE DASHBOARD
-              </button>
-              <button 
-                className="btn btn-secondary"
-                onClick={openTableEditor}
-              >
-                TABLE EDITOR
-              </button>
+            <div className="stat">
+              <div className="stat-title">Status</div>
+              <div className="stat-value text-lime-400">Connected</div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="card bg-base-200 shadow-xl">
-        <div className="card-body">
-          <h3 className="card-title text-lime-400">PROPOSED DATABASE STRUCTURE</h3>
-          <div className="space-y-4">
-            <div className="collapse collapse-arrow bg-base-300">
-              <input type="checkbox" />
-              <div className="collapse-title text-xl font-medium">
-                Users Table
-              </div>
-              <div className="collapse-content">
-                <ul className="list-disc list-inside space-y-1">
-                  <li>id (uuid, primary key)</li>
-                  <li>telegram_id (bigint, unique)</li>
-                  <li>username (text)</li>
-                  <li>first_name (text)</li>
-                  <li>last_name (text)</li>
-                  <li>language_code (text)</li>
-                  <li>created_at (timestamp)</li>
-                  <li>updated_at (timestamp)</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="collapse collapse-arrow bg-base-300">
-              <input type="checkbox" />
-              <div className="collapse-title text-xl font-medium">
-                Orders Table
-              </div>
-              <div className="collapse-content">
-                <ul className="list-disc list-inside space-y-1">
-                  <li>id (uuid, primary key)</li>
-                  <li>user_id (uuid, foreign key)</li>
-                  <li>order_items (jsonb)</li>
-                  <li>total_amount (decimal)</li>
-                  <li>status (text)</li>
-                  <li>delivery_address (text)</li>
-                  <li>phone_number (text)</li>
-                  <li>created_at (timestamp)</li>
-                  <li>completed_at (timestamp)</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="collapse collapse-arrow bg-base-300">
-              <input type="checkbox" />
-              <div className="collapse-title text-xl font-medium">
-                Menu Cache Table
-              </div>
-              <div className="collapse-content">
-                <ul className="list-disc list-inside space-y-1">
-                  <li>id (uuid, primary key)</li>
-                  <li>menu_data (jsonb)</li>
-                  <li>last_updated (timestamp)</li>
-                  <li>version (text)</li>
-                </ul>
-              </div>
-            </div>
+          <div className="card-actions justify-end space-x-2">
+            <button 
+              className={`btn btn-secondary ${isLoading ? 'loading' : ''}`}
+              onClick={testDatabaseConnection}
+              disabled={isLoading}
+            >
+              TEST CONNECTION
+            </button>
+            <button 
+              className={`btn btn-primary bg-lime-600 border-lime-600 hover:bg-lime-700 ${isLoading ? 'loading' : ''}`}
+              onClick={checkTables}
+              disabled={isLoading}
+            >
+              CHECK TABLES
+            </button>
           </div>
         </div>
       </div>
