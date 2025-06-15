@@ -1,3 +1,4 @@
+
 import { useConsole } from '@/hooks/useConsole';
 import { Bot, Database } from 'lucide-react';
 interface ConsoleProps {
@@ -21,7 +22,7 @@ export const Console = ({
               <Database className="w-3 h-3" />
               <span>GLORIA</span>
             </button>
-            <button onClick={() => setActiveTab('telegram')} className={`flex items-center space-x-1 px-3 py-1 rounded text-xs font-medium transition-colors ${activeTab === 'telegram' ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
+            <button onClick={() => setActiveTab('telegram')} className={`flex items-center space-x-1 px-3 py-1 rounded text-xs font-medium transition-colors ${activeTab === 'telegram' ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
               <Bot className="w-3 h-3" />
               <span>TELEGRAM</span>
             </button>
