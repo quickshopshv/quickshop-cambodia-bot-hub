@@ -212,7 +212,8 @@ export const GloriaTab = () => {
 
   return (
     <div className="space-y-6">
-      {/* Isolated Execute Button */}
+      {/* Isolated Execute Button - Commented out */}
+      {/*
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold text-green-600">
@@ -243,7 +244,9 @@ export const GloriaTab = () => {
           />
         </div>
         */}
+      {/*
       </div>
+      */}
 
       {/* GloriaFood Fetch Menu Snippet - Hidden when data is displayed */}
       {!hasData && (
