@@ -1,15 +1,47 @@
 
 import { useConsole } from '@/hooks/useConsole';
+import { Bot, Database } from 'lucide-react';
 
-export const Console = () => {
+interface ConsoleProps {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}
+
+export const Console = ({ activeTab, setActiveTab }: ConsoleProps) => {
   const { logs, clearLogs } = useConsole();
 
   return (
-    <div className="h-1/3 bg-base-300 border-t-2 border-lime-600">
-      <div className="flex justify-between items-center p-2 bg-base-200">
-        <h3 className="text-lime-400 font-bold">CONSOLE</h3>
+    <div className="h-1/3 bg-gray-900 border-t border-gray-300">
+      <div className="flex justify-between items-center p-3 bg-gray-800 border-b border-gray-700">
+        <div className="flex items-center space-x-4">
+          <h3 className="text-green-400 font-semibold text-sm">CONSOLE</h3>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setActiveTab('gloria')}
+              className={`flex items-center space-x-1 px-3 py-1 rounded text-xs font-medium transition-colors ${
+                activeTab === 'gloria'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              <Database className="w-3 h-3" />
+              <span>GLORIA</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('telegram')}
+              className={`flex items-center space-x-1 px-3 py-1 rounded text-xs font-medium transition-colors ${
+                activeTab === 'telegram'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              <Bot className="w-3 h-3" />
+              <span>TELEGRAM</span>
+            </button>
+          </div>
+        </div>
         <button 
-          className="btn btn-xs btn-error"
+          className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded transition-colors"
           onClick={clearLogs}
         >
           CLEAR
@@ -24,7 +56,7 @@ export const Console = () => {
               key={index} 
               className={`mb-1 ${
                 log.type === 'error' ? 'text-red-400' : 
-                log.type === 'success' ? 'text-lime-400' : 
+                log.type === 'success' ? 'text-green-400' : 
                 log.type === 'warning' ? 'text-yellow-400' : 
                 'text-white'
               }`}

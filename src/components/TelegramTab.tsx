@@ -143,214 +143,214 @@ export const TelegramTab = () => {
   const getStatusIcon = () => {
     switch (connectionStatus) {
       case 'success':
-        return <Check className="w-5 h-5 text-green-400" />;
+        return <Check className="w-4 h-4 text-green-600" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-red-400" />;
+        return <AlertCircle className="w-4 h-4 text-red-500" />;
       default:
-        return <Bot className="w-5 h-5 text-lime-400" />;
+        return <Bot className="w-4 h-4 text-gray-400" />;
     }
   };
 
   const getStatusColor = () => {
     switch (connectionStatus) {
       case 'success':
-        return 'border-green-500/50 bg-green-900/20';
+        return 'border-green-200 bg-green-50';
       case 'error':
-        return 'border-red-500/50 bg-red-900/20';
+        return 'border-red-200 bg-red-50';
       default:
-        return 'border-lime-500/50 bg-lime-900/20';
+        return 'border-gray-200 bg-white';
     }
   };
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
-      {/* Page Title */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-lime-400 to-green-400 bg-clip-text text-transparent">
-          TELEGRAM BOT CONFIGURATION
-        </h1>
-      </div>
-
-      {/* Status Card */}
-      <div className={`card shadow-2xl border-2 transition-all duration-300 ${getStatusColor()}`}>
-        <div className="card-body">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              {getStatusIcon()}
-              <span className="text-lg font-semibold">
-                Connection Status: {connectionStatus === 'idle' ? 'Not Tested' : connectionStatus === 'success' ? 'Connected' : 'Failed'}
-              </span>
+    <div className="space-y-6">
+      {/* Connection Status */}
+      <div className={`rounded-lg border p-4 ${getStatusColor()}`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            {getStatusIcon()}
+            <div>
+              <h3 className="text-sm font-medium text-gray-900">
+                Connection Status
+              </h3>
+              <p className="text-sm text-gray-600">
+                {connectionStatus === 'idle' ? 'Not tested' : connectionStatus === 'success' ? 'Connected' : 'Failed'}
+              </p>
             </div>
-            <button 
-              className={`btn btn-sm ${isLoading ? 'loading' : ''} ${connectionStatus === 'success' ? 'btn-success' : 'btn-outline'}`}
-              onClick={testTelegramConnection}
-              disabled={isLoading || !botToken}
-            >
-              {isLoading ? 'Testing...' : 'Test Connection'}
-            </button>
           </div>
+          <button 
+            className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white transition-colors ${
+              isLoading ? 'bg-gray-400 cursor-not-allowed' : 
+              connectionStatus === 'success' ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-900 hover:bg-gray-800'
+            }`}
+            onClick={testTelegramConnection}
+            disabled={isLoading || !botToken}
+          >
+            {isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Testing...
+              </>
+            ) : (
+              'Test Connection'
+            )}
+          </button>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-8">
+      <div className="grid lg:grid-cols-2 gap-6">
         {/* Bot Configuration */}
-        <div className="card bg-base-200/80 shadow-xl border border-lime-500/20 backdrop-blur-sm">
-          <div className="card-body">
-            <div className="flex items-center space-x-3 mb-6">
-              <Settings className="w-6 h-6 text-green-500" />
-              <h2 className="card-title text-green-500">BOT SETTINGS</h2>
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center space-x-3 mb-6">
+            <Settings className="w-5 h-5 text-green-600" />
+            <h2 className="text-lg font-semibold text-green-600">Bot Settings</h2>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="flex items-center space-x-2">
+                  <Shield className="w-4 h-4" />
+                  <span>Bot Token</span>
+                </div>
+              </label>
+              <input
+                type="password"
+                value={botToken}
+                onChange={(e) => handleBotTokenChange(e.target.value)}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                placeholder="Enter Telegram Bot Token (from @BotFather)"
+              />
             </div>
-            
-            <div className="space-y-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium flex items-center space-x-2">
-                    <Shield className="w-4 h-4" />
-                    <span>BOT TOKEN</span>
-                  </span>
-                </label>
-                <input
-                  type="password"
-                  value={botToken}
-                  onChange={(e) => handleBotTokenChange(e.target.value)}
-                  className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
-                  placeholder="Enter Telegram Bot Token (from @BotFather)"
-                />
-              </div>
 
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium flex items-center space-x-2">
-                    <Bot className="w-4 h-4" />
-                    <span>BOT USERNAME</span>
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  value={botUsername}
-                  onChange={(e) => handleBotUsernameChange(e.target.value)}
-                  className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
-                  placeholder="@your_bot_username"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="flex items-center space-x-2">
+                  <Bot className="w-4 h-4" />
+                  <span>Bot Username</span>
+                </div>
+              </label>
+              <input
+                type="text"
+                value={botUsername}
+                onChange={(e) => handleBotUsernameChange(e.target.value)}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                placeholder="@your_bot_username"
+              />
+            </div>
 
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium flex items-center space-x-2">
-                    <Globe className="w-4 h-4" />
-                    <span>BOT DOMAIN</span>
-                  </span>
-                </label>
-                <input
-                  type="text"
-                  value={botDomain}
-                  onChange={(e) => handleBotDomainChange(e.target.value)}
-                  className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
-                  placeholder="your-domain.com"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="flex items-center space-x-2">
+                  <Globe className="w-4 h-4" />
+                  <span>Bot Domain</span>
+                </div>
+              </label>
+              <input
+                type="text"
+                value={botDomain}
+                onChange={(e) => handleBotDomainChange(e.target.value)}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                placeholder="your-domain.com"
+              />
+            </div>
 
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium flex items-center space-x-2">
-                    <Webhook className="w-4 h-4" />
-                    <span>BOT WEBAPP URL</span>
-                  </span>
-                </label>
-                <input
-                  type="url"
-                  value={botWebappUrl}
-                  onChange={(e) => handleBotWebappUrlChange(e.target.value)}
-                  className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
-                  placeholder="https://your-webapp-url.com"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="flex items-center space-x-2">
+                  <Webhook className="w-4 h-4" />
+                  <span>Bot Webapp URL</span>
+                </div>
+              </label>
+              <input
+                type="url"
+                value={botWebappUrl}
+                onChange={(e) => handleBotWebappUrlChange(e.target.value)}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                placeholder="https://your-webapp-url.com"
+              />
             </div>
           </div>
         </div>
 
         {/* Channel Configuration */}
-        <div className="card bg-base-200/80 shadow-xl border border-lime-500/20 backdrop-blur-sm">
-          <div className="card-body">
-            <div className="flex items-center space-x-3 mb-6">
-              <MessageCircle className="w-6 h-6 text-green-500" />
-              <h2 className="card-title text-green-500">PRIVATE CHANNELS</h2>
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="flex items-center space-x-3 mb-6">
+            <MessageCircle className="w-5 h-5 text-green-600" />
+            <h2 className="text-lg font-semibold text-green-600">Private Channels</h2>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                New Order Channel
+              </label>
+              <input
+                type="text"
+                value={privateChannelNewOrder}
+                onChange={(e) => handlePrivateChannelNewOrderChange(e.target.value)}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                placeholder="@new_orders_channel or -1001234567890"
+              />
             </div>
-            
-            <div className="space-y-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">NEW ORDER CHANNEL</span>
-                </label>
-                <input
-                  type="text"
-                  value={privateChannelNewOrder}
-                  onChange={(e) => handlePrivateChannelNewOrderChange(e.target.value)}
-                  className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
-                  placeholder="@new_orders_channel or -1001234567890"
-                />
-              </div>
 
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">COMPLETED ORDERS CHANNEL</span>
-                </label>
-                <input
-                  type="text"
-                  value={privateChannelCompletedOrders}
-                  onChange={(e) => handlePrivateChannelCompletedOrdersChange(e.target.value)}
-                  className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
-                  placeholder="@completed_orders_channel or -1001234567890"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Completed Orders Channel
+              </label>
+              <input
+                type="text"
+                value={privateChannelCompletedOrders}
+                onChange={(e) => handlePrivateChannelCompletedOrdersChange(e.target.value)}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                placeholder="@completed_orders_channel or -1001234567890"
+              />
+            </div>
 
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">EXISTING USER CHANNEL</span>
-                </label>
-                <input
-                  type="text"
-                  value={privateChannelExistingUser}
-                  onChange={(e) => handlePrivateChannelExistingUserChange(e.target.value)}
-                  className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
-                  placeholder="@existing_users_channel or -1001234567890"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Existing User Channel
+              </label>
+              <input
+                type="text"
+                value={privateChannelExistingUser}
+                onChange={(e) => handlePrivateChannelExistingUserChange(e.target.value)}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                placeholder="@existing_users_channel or -1001234567890"
+              />
+            </div>
 
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium flex items-center space-x-2">
-                    <Globe className="w-4 h-4" />
-                    <span>TELEGRAM API URL</span>
-                  </span>
-                </label>
-                <input
-                  type="url"
-                  value={apiUrl}
-                  onChange={(e) => handleApiUrlChange(e.target.value)}
-                  className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
-                  placeholder="https://api.telegram.org"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                <div className="flex items-center space-x-2">
+                  <Globe className="w-4 h-4" />
+                  <span>Telegram API URL</span>
+                </div>
+              </label>
+              <input
+                type="url"
+                value={apiUrl}
+                onChange={(e) => handleApiUrlChange(e.target.value)}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                placeholder="https://api.telegram.org"
+              />
             </div>
           </div>
         </div>
       </div>
 
       {/* API Test Snippet */}
-      <div className="card bg-base-200/80 shadow-xl border border-lime-500/20 backdrop-blur-sm">
-        <div className="card-body">
-          <h3 className="card-title text-green-500 mb-4 flex items-center space-x-2">
-            <Bot className="w-5 h-5" />
-            <span>TELEGRAM API TEST SNIPPET</span>
-          </h3>
-          <div className="mockup-code bg-base-300/50 border border-lime-500/30">
-            <pre data-prefix="$" className="text-lime-300">
-              <code>{`curl "${apiUrl}/bot${botToken || '{BOT_TOKEN}'}/getMe" \\
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-green-600 mb-4 flex items-center space-x-2">
+          <Bot className="w-5 h-5" />
+          <span>Telegram API Test Snippet</span>
+        </h3>
+        <div className="bg-gray-900 rounded-md p-4 overflow-x-auto">
+          <pre className="text-green-400 text-sm">
+            <code>{`curl "${apiUrl}/bot${botToken || '{BOT_TOKEN}'}/getMe" \\
    -X GET \\
    -H "Content-Type: application/json"`}</code>
-            </pre>
-          </div>
+          </pre>
         </div>
       </div>
     </div>
