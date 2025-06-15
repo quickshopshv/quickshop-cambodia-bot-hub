@@ -218,7 +218,7 @@ export const TelegramTab = () => {
                 type="password"
                 value={botToken}
                 onChange={(e) => handleBotTokenChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
                 placeholder="Enter Telegram Bot Token (from @BotFather)"
               />
             </div>
@@ -234,7 +234,7 @@ export const TelegramTab = () => {
                 type="text"
                 value={botUsername}
                 onChange={(e) => handleBotUsernameChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
                 placeholder="@your_bot_username"
               />
             </div>
@@ -250,7 +250,7 @@ export const TelegramTab = () => {
                 type="text"
                 value={botDomain}
                 onChange={(e) => handleBotDomainChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
                 placeholder="your-domain.com"
               />
             </div>
@@ -266,7 +266,7 @@ export const TelegramTab = () => {
                 type="url"
                 value={botWebappUrl}
                 onChange={(e) => handleBotWebappUrlChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
                 placeholder="https://your-webapp-url.com"
               />
             </div>
@@ -289,7 +289,7 @@ export const TelegramTab = () => {
                 type="text"
                 value={privateChannelNewOrder}
                 onChange={(e) => handlePrivateChannelNewOrderChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
                 placeholder="@new_orders_channel or -1001234567890"
               />
             </div>
@@ -302,7 +302,7 @@ export const TelegramTab = () => {
                 type="text"
                 value={privateChannelCompletedOrders}
                 onChange={(e) => handlePrivateChannelCompletedOrdersChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
                 placeholder="@completed_orders_channel or -1001234567890"
               />
             </div>
@@ -315,7 +315,7 @@ export const TelegramTab = () => {
                 type="text"
                 value={privateChannelExistingUser}
                 onChange={(e) => handlePrivateChannelExistingUserChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
                 placeholder="@existing_users_channel or -1001234567890"
               />
             </div>
@@ -331,7 +331,7 @@ export const TelegramTab = () => {
                 type="url"
                 value={apiUrl}
                 onChange={(e) => handleApiUrlChange(e.target.value)}
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
                 placeholder="https://api.telegram.org"
               />
             </div>
