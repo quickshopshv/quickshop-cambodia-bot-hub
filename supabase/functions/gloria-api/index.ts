@@ -7,14 +7,20 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  console.log('Gloria API function called, method:', req.method)
+  
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { restaurantKey, endpoint = 'menu' } = await req.json()
+    const body = await req.json()
+    console.log('Request body:', body)
+    
+    const { restaurantKey, endpoint = 'menu' } = body
     
     if (!restaurantKey) {
+      console.log('No restaurant key provided')
       return new Response(
         JSON.stringify({ error: 'Restaurant key is required' }),
         { 
@@ -24,9 +30,12 @@ serve(async (req) => {
       )
     }
 
-    console.log('Making request to Gloria API with key:', restaurantKey)
+    console.log('Making request to Gloria API with key:', restaurantKey, 'endpoint:', endpoint)
     
-    const response = await fetch(`https://pos.globalfoodsoft.com/pos/${endpoint}`, {
+    const gloriaUrl = `https://pos.globalfoodsoft.com/pos/${endpoint}`
+    console.log('Requesting URL:', gloriaUrl)
+    
+    const response = await fetch(gloriaUrl, {
       method: 'GET',
       headers: {
         'Authorization': restaurantKey,
@@ -35,40 +44,56 @@ serve(async (req) => {
       }
     })
 
-    const data = await response.text()
     console.log('Gloria API response status:', response.status)
-    console.log('Gloria API response preview:', data.substring(0, 200))
+    console.log('Gloria API response headers:', Object.fromEntries(response.headers.entries()))
+
+    const data = await response.text()
+    console.log('Gloria API response length:', data.length)
+    console.log('Gloria API response preview:', data.substring(0, 500))
 
     if (response.ok) {
       return new Response(
         JSON.stringify({ 
           success: true, 
           data: data,
-          status: response.status 
+          status: response.status,
+          headers: Object.fromEntries(response.headers.entries())
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       )
     } else {
+      console.log('Gloria API returned error status:', response.status)
       return new Response(
         JSON.stringify({ 
+          success: false,
           error: `Gloria API error: ${response.status} ${response.statusText}`,
-          data: data
+          data: data,
+          status: response.status
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: response.status
+          status: 200 // Return 200 so the client can handle the error properly
         }
       )
     }
   } catch (error) {
-    console.error('Edge function error:', error)
+    console.error('Edge function error details:', error)
+    console.error('Error name:', error.name)
+    console.error('Error message:', error.message)
+    console.error('Error stack:', error.stack)
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        success: false,
+        error: `Edge function error: ${error.message}`,
+        errorType: error.name,
+        details: error.stack
+      }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
+        status: 200 // Return 200 so the client can handle the error properly
       }
     )
   }

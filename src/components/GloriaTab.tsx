@@ -13,6 +13,8 @@ export const GloriaTab = () => {
     addLog('Testing Gloria connection via Edge Function...', 'info');
     
     try {
+      console.log('Calling edge function with restaurant key:', restaurantKey);
+      
       const { data, error } = await supabase.functions.invoke('gloria-api', {
         body: { 
           restaurantKey,
@@ -20,23 +22,33 @@ export const GloriaTab = () => {
         }
       });
 
+      console.log('Edge function response:', { data, error });
+
       if (error) {
         addLog(`Edge Function error: ${error.message}`, 'error');
+        console.error('Edge function error:', error);
         return;
       }
 
-      if (data.success) {
+      if (data?.success) {
         addLog('Gloria connection successful!', 'success');
         addLog(`Response status: ${data.status}`, 'info');
-        addLog(`XML data preview: ${data.data.substring(0, 200)}...`, 'info');
-      } else {
-        addLog(`Gloria API error: ${data.error}`, 'error');
         if (data.data) {
+          const preview = data.data.length > 200 ? `${data.data.substring(0, 200)}...` : data.data;
+          addLog(`XML data preview: ${preview}`, 'info');
+        }
+      } else {
+        addLog(`Gloria API error: ${data?.error || 'Unknown error'}`, 'error');
+        if (data?.data) {
           addLog(`Response data: ${data.data}`, 'warning');
+        }
+        if (data?.details) {
+          console.error('Error details:', data.details);
         }
       }
     } catch (error) {
-      addLog(`Connection error: ${error}`, 'error');
+      console.error('Catch block error:', error);
+      addLog(`Connection error: ${error.message}`, 'error');
     } finally {
       setIsLoading(false);
     }
