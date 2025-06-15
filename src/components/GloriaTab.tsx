@@ -82,36 +82,24 @@ export const GloriaTab = () => {
             return;
           }
           
-          // Try different possible category element names
-          let categoryElements = xmlDoc.getElementsByTagName('category');
-          addLog(`Found ${categoryElements.length} 'category' elements`, 'info');
-          
-          if (categoryElements.length === 0) {
-            // Try alternative tag names
-            categoryElements = xmlDoc.getElementsByTagName('Category');
-            addLog(`Found ${categoryElements.length} 'Category' elements (capitalized)`, 'info');
-          }
-          
-          if (categoryElements.length === 0) {
-            // Try to find any elements with 'name' attribute
-            const allElements = xmlDoc.getElementsByTagName('*');
-            const elementsWithName = [];
-            for (let i = 0; i < allElements.length; i++) {
-              if (allElements[i].getAttribute('name')) {
-                elementsWithName.push(allElements[i].tagName);
-              }
-            }
-            addLog(`Elements with 'name' attribute: ${elementsWithName.join(', ')}`, 'info');
-          }
+          // Find category elements
+          const categoryElements = xmlDoc.getElementsByTagName('category');
+          addLog(`Found ${categoryElements.length} category elements`, 'info');
           
           const extractedCategories: Category[] = [];
           for (let i = 0; i < categoryElements.length; i++) {
-            const categoryName = categoryElements[i].getAttribute('name');
-            if (categoryName) {
-              extractedCategories.push({
-                name: categoryName,
-                enabled: true // Default to enabled
-              });
+            const categoryElement = categoryElements[i];
+            const nameElement = categoryElement.getElementsByTagName('name')[0];
+            
+            if (nameElement && nameElement.textContent) {
+              const categoryName = nameElement.textContent.trim();
+              if (categoryName) {
+                extractedCategories.push({
+                  name: categoryName,
+                  enabled: true // Default to enabled
+                });
+                addLog(`Found category: ${categoryName}`, 'info');
+              }
             }
           }
           
@@ -119,10 +107,7 @@ export const GloriaTab = () => {
           extractedCategories.sort((a, b) => a.name.localeCompare(b.name));
           setCategories(extractedCategories);
           
-          addLog(`Found ${extractedCategories.length} categories`, 'success');
-          extractedCategories.forEach(cat => {
-            addLog(`Category: ${cat.name}`, 'info');
-          });
+          addLog(`Successfully extracted ${extractedCategories.length} categories`, 'success');
           
         } catch (parseError) {
           addLog(`Failed to parse XML: ${parseError.message}`, 'error');
