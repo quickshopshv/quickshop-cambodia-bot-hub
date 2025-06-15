@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useConsole } from '@/hooks/useConsole';
 import { supabase } from '@/lib/supabase';
+import { ExternalLink } from 'lucide-react';
 
 export const GloriaTab = () => {
   const [restaurantKey, setRestaurantKey] = useState('w9p03u55Nf5BZmGllx');
@@ -26,7 +27,16 @@ export const GloriaTab = () => {
 
       if (error) {
         addLog(`Edge Function error: ${error.message}`, 'error');
-        console.error('Edge function error:', error);
+        addLog(`Error details: ${JSON.stringify(error)}`, 'error');
+        console.error('Edge function error details:', error);
+        
+        // Additional error details for debugging
+        if (error.context) {
+          addLog(`Error context: ${JSON.stringify(error.context)}`, 'error');
+        }
+        if (error.details) {
+          addLog(`Error details: ${JSON.stringify(error.details)}`, 'error');
+        }
         return;
       }
 
@@ -43,12 +53,27 @@ export const GloriaTab = () => {
           addLog(`Response data: ${data.data}`, 'warning');
         }
         if (data?.details) {
+          addLog(`Error details: ${JSON.stringify(data.details)}`, 'error');
           console.error('Error details:', data.details);
         }
       }
     } catch (error) {
       console.error('Catch block error:', error);
       addLog(`Connection error: ${error.message}`, 'error');
+      
+      // Enhanced error logging for debugging
+      addLog(`Error type: ${error.name}`, 'error');
+      if (error.stack) {
+        addLog(`Error stack: ${error.stack}`, 'error');
+      }
+      if (error.cause) {
+        addLog(`Error cause: ${JSON.stringify(error.cause)}`, 'error');
+      }
+      
+      // Check for specific network errors
+      if (error.message.includes('Failed to fetch')) {
+        addLog('Network error detected. Check your internet connection and Supabase project status.', 'warning');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -57,6 +82,12 @@ export const GloriaTab = () => {
   const saveGloriaVariables = () => {
     localStorage.setItem('RESTAURANT_KEY', restaurantKey);
     addLog('Gloria variables saved to localStorage', 'success');
+  };
+
+  const openEdgeFunctionLogs = () => {
+    const logsUrl = 'https://supabase.com/dashboard/project/fxhtcdyxmtfyvanqhaty/functions/gloria-api/logs';
+    window.open(logsUrl, '_blank');
+    addLog('Opening Edge Function logs in new tab...', 'info');
   };
 
   return (
@@ -93,6 +124,24 @@ export const GloriaTab = () => {
               TEST CONNECTION
             </button>
           </div>
+        </div>
+      </div>
+
+      <div className="card bg-base-200 shadow-xl">
+        <div className="card-body">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="card-title text-lime-400">DEBUGGING & LOGS</h3>
+            <button 
+              className="btn btn-outline btn-sm"
+              onClick={openEdgeFunctionLogs}
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              VIEW EDGE FUNCTION LOGS
+            </button>
+          </div>
+          <p className="text-sm text-gray-400 mb-4">
+            Click the button above to view detailed Edge Function logs in Supabase dashboard for debugging connection issues.
+          </p>
         </div>
       </div>
 
