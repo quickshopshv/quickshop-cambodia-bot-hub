@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useConsole } from '@/hooks/useConsole';
-import { ExternalLink, Bot, MessageCircle, Settings, Globe, Webhook, Shield, Check, AlertCircle } from 'lucide-react';
+import { Bot, MessageCircle, Settings, Globe, Webhook, Shield, Check, AlertCircle } from 'lucide-react';
 
 export const TelegramTab = () => {
   const [botToken, setBotToken] = useState('');
@@ -37,16 +37,49 @@ export const TelegramTab = () => {
     setApiUrl(savedApiUrl);
   }, []);
 
-  const saveTelegramVariables = () => {
-    localStorage.setItem('BOT_TOKEN', botToken);
-    localStorage.setItem('BOT_USERNAME', botUsername);
-    localStorage.setItem('BOT_DOMAIN', botDomain);
-    localStorage.setItem('BOT_WEBAPP_URL', botWebappUrl);
-    localStorage.setItem('PRIVATE_CHANNEL_NEW_ORDER', privateChannelNewOrder);
-    localStorage.setItem('PRIVATE_CHANNEL_COMPLETED_ORDERS', privateChannelCompletedOrders);
-    localStorage.setItem('PRIVATE_CHANNEL_EXISTING_USER', privateChannelExistingUser);
-    localStorage.setItem('TELEGRAM_API_URL', apiUrl);
-    addLog('✅ All Telegram variables saved successfully', 'success');
+  const autoSave = (key: string, value: string) => {
+    localStorage.setItem(key, value);
+    addLog(`💾 Auto-saved ${key}`, 'info');
+  };
+
+  const handleBotTokenChange = (value: string) => {
+    setBotToken(value);
+    autoSave('BOT_TOKEN', value);
+  };
+
+  const handleBotUsernameChange = (value: string) => {
+    setBotUsername(value);
+    autoSave('BOT_USERNAME', value);
+  };
+
+  const handleBotDomainChange = (value: string) => {
+    setBotDomain(value);
+    autoSave('BOT_DOMAIN', value);
+  };
+
+  const handleBotWebappUrlChange = (value: string) => {
+    setBotWebappUrl(value);
+    autoSave('BOT_WEBAPP_URL', value);
+  };
+
+  const handlePrivateChannelNewOrderChange = (value: string) => {
+    setPrivateChannelNewOrder(value);
+    autoSave('PRIVATE_CHANNEL_NEW_ORDER', value);
+  };
+
+  const handlePrivateChannelCompletedOrdersChange = (value: string) => {
+    setPrivateChannelCompletedOrders(value);
+    autoSave('PRIVATE_CHANNEL_COMPLETED_ORDERS', value);
+  };
+
+  const handlePrivateChannelExistingUserChange = (value: string) => {
+    setPrivateChannelExistingUser(value);
+    autoSave('PRIVATE_CHANNEL_EXISTING_USER', value);
+  };
+
+  const handleApiUrlChange = (value: string) => {
+    setApiUrl(value);
+    autoSave('TELEGRAM_API_URL', value);
   };
 
   const testTelegramConnection = async () => {
@@ -107,11 +140,6 @@ export const TelegramTab = () => {
     }
   };
 
-  const openTelegramBotDocs = () => {
-    window.open('https://core.telegram.org/bots/api', '_blank');
-    addLog('📖 Opening Telegram Bot API documentation...', 'info');
-  };
-
   const getStatusIcon = () => {
     switch (connectionStatus) {
       case 'success':
@@ -136,17 +164,11 @@ export const TelegramTab = () => {
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
-      {/* Header Section */}
-      <div className="text-center space-y-4">
-        <div className="flex items-center justify-center space-x-3">
-          <Bot className="w-8 h-8 text-lime-400" />
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-lime-400 to-green-400 bg-clip-text text-transparent">
-            TELEGRAM BOT CONFIGURATION
-          </h1>
-        </div>
-        <p className="text-gray-400 max-w-2xl mx-auto">
-          Configure your Telegram bot settings and test the connection to ensure everything is working properly.
-        </p>
+      {/* Page Title */}
+      <div className="text-center">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-lime-400 to-green-400 bg-clip-text text-transparent">
+          TELEGRAM BOT CONFIGURATION
+        </h1>
       </div>
 
       {/* Status Card */}
@@ -175,8 +197,8 @@ export const TelegramTab = () => {
         <div className="card bg-base-200/80 shadow-xl border border-lime-500/20 backdrop-blur-sm">
           <div className="card-body">
             <div className="flex items-center space-x-3 mb-6">
-              <Settings className="w-6 h-6 text-lime-400" />
-              <h2 className="card-title text-lime-400">BOT SETTINGS</h2>
+              <Settings className="w-6 h-6 text-green-500" />
+              <h2 className="card-title text-green-500">BOT SETTINGS</h2>
             </div>
             
             <div className="space-y-4">
@@ -190,7 +212,7 @@ export const TelegramTab = () => {
                 <input
                   type="password"
                   value={botToken}
-                  onChange={(e) => setBotToken(e.target.value)}
+                  onChange={(e) => handleBotTokenChange(e.target.value)}
                   className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
                   placeholder="Enter Telegram Bot Token (from @BotFather)"
                 />
@@ -206,7 +228,7 @@ export const TelegramTab = () => {
                 <input
                   type="text"
                   value={botUsername}
-                  onChange={(e) => setBotUsername(e.target.value)}
+                  onChange={(e) => handleBotUsernameChange(e.target.value)}
                   className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
                   placeholder="@your_bot_username"
                 />
@@ -222,7 +244,7 @@ export const TelegramTab = () => {
                 <input
                   type="text"
                   value={botDomain}
-                  onChange={(e) => setBotDomain(e.target.value)}
+                  onChange={(e) => handleBotDomainChange(e.target.value)}
                   className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
                   placeholder="your-domain.com"
                 />
@@ -238,7 +260,7 @@ export const TelegramTab = () => {
                 <input
                   type="url"
                   value={botWebappUrl}
-                  onChange={(e) => setBotWebappUrl(e.target.value)}
+                  onChange={(e) => handleBotWebappUrlChange(e.target.value)}
                   className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
                   placeholder="https://your-webapp-url.com"
                 />
@@ -251,8 +273,8 @@ export const TelegramTab = () => {
         <div className="card bg-base-200/80 shadow-xl border border-lime-500/20 backdrop-blur-sm">
           <div className="card-body">
             <div className="flex items-center space-x-3 mb-6">
-              <MessageCircle className="w-6 h-6 text-lime-400" />
-              <h2 className="card-title text-lime-400">PRIVATE CHANNELS</h2>
+              <MessageCircle className="w-6 h-6 text-green-500" />
+              <h2 className="card-title text-green-500">PRIVATE CHANNELS</h2>
             </div>
             
             <div className="space-y-4">
@@ -263,7 +285,7 @@ export const TelegramTab = () => {
                 <input
                   type="text"
                   value={privateChannelNewOrder}
-                  onChange={(e) => setPrivateChannelNewOrder(e.target.value)}
+                  onChange={(e) => handlePrivateChannelNewOrderChange(e.target.value)}
                   className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
                   placeholder="@new_orders_channel or -1001234567890"
                 />
@@ -276,7 +298,7 @@ export const TelegramTab = () => {
                 <input
                   type="text"
                   value={privateChannelCompletedOrders}
-                  onChange={(e) => setPrivateChannelCompletedOrders(e.target.value)}
+                  onChange={(e) => handlePrivateChannelCompletedOrdersChange(e.target.value)}
                   className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
                   placeholder="@completed_orders_channel or -1001234567890"
                 />
@@ -289,7 +311,7 @@ export const TelegramTab = () => {
                 <input
                   type="text"
                   value={privateChannelExistingUser}
-                  onChange={(e) => setPrivateChannelExistingUser(e.target.value)}
+                  onChange={(e) => handlePrivateChannelExistingUserChange(e.target.value)}
                   className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
                   placeholder="@existing_users_channel or -1001234567890"
                 />
@@ -305,7 +327,7 @@ export const TelegramTab = () => {
                 <input
                   type="url"
                   value={apiUrl}
-                  onChange={(e) => setApiUrl(e.target.value)}
+                  onChange={(e) => handleApiUrlChange(e.target.value)}
                   className="input input-bordered w-full bg-base-300/50 focus:border-lime-400 transition-colors"
                   placeholder="https://api.telegram.org"
                 />
@@ -315,29 +337,11 @@ export const TelegramTab = () => {
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex justify-center space-x-4">
-        <button 
-          className="btn btn-primary bg-gradient-to-r from-lime-600 to-green-600 border-none hover:from-lime-700 hover:to-green-700 text-white px-8 py-3 text-lg shadow-lg"
-          onClick={saveTelegramVariables}
-        >
-          <Settings className="w-5 h-5 mr-2" />
-          SAVE CONFIGURATION
-        </button>
-        <button 
-          className="btn btn-outline btn-primary border-lime-500 text-lime-400 hover:bg-lime-500 hover:text-black px-6 py-3"
-          onClick={openTelegramBotDocs}
-        >
-          <ExternalLink className="w-5 h-5 mr-2" />
-          API DOCS
-        </button>
-      </div>
-
       {/* API Test Snippet */}
       <div className="card bg-base-200/80 shadow-xl border border-lime-500/20 backdrop-blur-sm">
         <div className="card-body">
-          <h3 className="card-title text-lime-400 mb-4 flex items-center space-x-2">
-            <ExternalLink className="w-5 h-5" />
+          <h3 className="card-title text-green-500 mb-4 flex items-center space-x-2">
+            <Bot className="w-5 h-5" />
             <span>TELEGRAM API TEST SNIPPET</span>
           </h3>
           <div className="mockup-code bg-base-300/50 border border-lime-500/30">

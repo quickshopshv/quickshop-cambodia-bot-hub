@@ -43,16 +43,30 @@ const Index = () => {
     );
   }
 
+  const getPageTitle = () => {
+    switch (activeTab) {
+      case 'gloria':
+        return 'GLORIA API CONFIGURATION';
+      case 'telegram':
+        return 'TELEGRAM BOT CONFIGURATION';
+      case 'database':
+        return 'DATABASE CONFIGURATION';
+      case 'other':
+        return 'OTHER SETTINGS';
+      default:
+        return 'QUICKSHOP CAMBODIA BOT HUB';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-base-100 text-base-content" data-theme="dark">
       <div className="flex flex-col h-screen">
         {/* Header */}
         <div className="navbar bg-base-200 border-b border-lime-600">
           <div className="flex-1">
-            <h1 className="text-xl font-bold text-lime-400">QuickShop Cambodia Bot Hub</h1>
-          </div>
-          <div className="flex-none">
-            <div className="badge badge-success">Online</div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-lime-400 to-green-400 bg-clip-text text-transparent">
+              {getPageTitle()}
+            </h1>
           </div>
         </div>
 
