@@ -1,10 +1,12 @@
 
 import { useConsole } from '@/hooks/useConsole';
-import { Bot, Database } from 'lucide-react';
+import { Bot, Database, ExternalLink, TestTube } from 'lucide-react';
+
 interface ConsoleProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
+
 export const Console = ({
   activeTab,
   setActiveTab
@@ -13,7 +15,23 @@ export const Console = ({
     logs,
     clearLogs
   } = useConsole();
-  return <div className="h-1/3 bg-gray-900 border-t border-gray-300">
+
+  const openEdgeFunctionLogs = () => {
+    const logsUrl = 'https://supabase.com/dashboard/project/fxhtcdyxmtfyvanqhaty/functions/gloria-api/logs';
+    window.open(logsUrl, '_blank');
+    // Get the addLog function from the hook to log this action
+    const { addLog } = useConsole();
+    addLog('Opening Edge Function logs in new tab...', 'info');
+  };
+
+  const handleTestConnection = () => {
+    // Dispatch a custom event that the active tab can listen to
+    const event = new CustomEvent('testConnection', { detail: { tab: activeTab } });
+    window.dispatchEvent(event);
+  };
+
+  return (
+    <div className="h-1/3 bg-gray-900 border-t border-gray-300">
       <div className="flex justify-between items-center p-3 bg-gray-800 border-b border-gray-700">
         <div className="flex items-center space-x-4">
           <h3 className="text-green-400 font-semibold text-sm">CONSOLE</h3>
@@ -32,14 +50,31 @@ export const Console = ({
             </button>
           </div>
         </div>
-        <button onClick={clearLogs} className="px-3 py-1 text-white text-xs font-medium rounded transition-colors bg-amber-500 hover:bg-amber-400">
-          CLEAR
-        </button>
+        <div className="flex items-center space-x-2">
+          <button 
+            onClick={handleTestConnection}
+            className="flex items-center space-x-1 px-3 py-1 text-white text-xs font-medium rounded transition-colors bg-blue-500 hover:bg-blue-600"
+          >
+            <TestTube className="w-3 h-3" />
+            <span>TEST</span>
+          </button>
+          <button 
+            onClick={openEdgeFunctionLogs}
+            className="flex items-center space-x-1 px-3 py-1 text-white text-xs font-medium rounded transition-colors bg-green-500 hover:bg-green-600"
+          >
+            <Database className="w-3 h-3" />
+            <span>EDGE LOGS</span>
+          </button>
+          <button onClick={clearLogs} className="px-3 py-1 text-white text-xs font-medium rounded transition-colors bg-amber-500 hover:bg-amber-400">
+            CLEAR
+          </button>
+        </div>
       </div>
       <div className="h-full p-4 overflow-y-auto font-mono text-sm">
         {logs.length === 0 ? <div className="text-gray-500">Console ready...</div> : logs.map((log, index) => <div key={index} className={`mb-1 ${log.type === 'error' ? 'text-red-400' : log.type === 'success' ? 'text-green-400' : log.type === 'warning' ? 'text-yellow-400' : 'text-white'}`}>
               <span className="text-gray-400">[{log.timestamp}]</span> {log.message}
             </div>)}
       </div>
-    </div>;
+    </div>
+  );
 };

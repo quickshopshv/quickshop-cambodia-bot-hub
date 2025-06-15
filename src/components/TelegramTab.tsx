@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useConsole } from '@/hooks/useConsole';
 import { Bot, MessageCircle, Settings, Globe, Webhook, Shield, Check, AlertCircle } from 'lucide-react';
@@ -35,6 +34,18 @@ export const TelegramTab = () => {
     setPrivateChannelCompletedOrders(savedPrivateChannelCompletedOrders);
     setPrivateChannelExistingUser(savedPrivateChannelExistingUser);
     setApiUrl(savedApiUrl);
+
+    // Listen for test connection events from console
+    const handleTestConnection = (event: CustomEvent) => {
+      if (event.detail.tab === 'telegram') {
+        testTelegramConnection();
+      }
+    };
+
+    window.addEventListener('testConnection', handleTestConnection as EventListener);
+    return () => {
+      window.removeEventListener('testConnection', handleTestConnection as EventListener);
+    };
   }, []);
 
   const autoSave = (key: string, value: string) => {
@@ -166,35 +177,17 @@ export const TelegramTab = () => {
     <div className="space-y-6">
       {/* Connection Status */}
       <div className={`rounded-lg border p-4 ${getStatusColor()}`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            {getStatusIcon()}
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">
-                Connection Status
-              </h3>
-              <p className="text-sm text-gray-600">
-                {connectionStatus === 'idle' ? 'Not tested' : connectionStatus === 'success' ? 'Connected' : 'Failed'}
-              </p>
-            </div>
+        <div className="flex items-center space-x-3">
+          {getStatusIcon()}
+          <div>
+            <h3 className="text-sm font-medium text-gray-900">
+              Connection Status
+            </h3>
+            <p className="text-sm text-gray-600">
+              {connectionStatus === 'idle' ? 'Not tested' : connectionStatus === 'success' ? 'Connected' : 'Failed'}
+              {isLoading && ' - Testing...'}
+            </p>
           </div>
-          <button 
-            className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white transition-colors ${
-              isLoading ? 'bg-gray-400 cursor-not-allowed' : 
-              connectionStatus === 'success' ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-900 hover:bg-gray-800'
-            }`}
-            onClick={testTelegramConnection}
-            disabled={isLoading || !botToken}
-          >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Testing...
-              </>
-            ) : (
-              'Test Connection'
-            )}
-          </button>
         </div>
       </div>
 

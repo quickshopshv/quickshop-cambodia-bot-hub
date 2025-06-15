@@ -1,14 +1,32 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useConsole } from '@/hooks/useConsole';
 import { supabase } from '@/lib/supabase';
-import { ExternalLink, Database, Check, AlertCircle } from 'lucide-react';
+import { Database, Check, AlertCircle } from 'lucide-react';
 
 export const GloriaTab = () => {
   const [restaurantKey, setRestaurantKey] = useState('w9p03u55Nf5BZmGllx');
   const [isLoading, setIsLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const { addLog } = useConsole();
+
+  useEffect(() => {
+    // Load saved restaurant key on component mount
+    const savedRestaurantKey = localStorage.getItem('RESTAURANT_KEY') || 'w9p03u55Nf5BZmGllx';
+    setRestaurantKey(savedRestaurantKey);
+
+    // Listen for test connection events from console
+    const handleTestConnection = (event: CustomEvent) => {
+      if (event.detail.tab === 'gloria') {
+        testGloriaConnection();
+      }
+    };
+
+    window.addEventListener('testConnection', handleTestConnection as EventListener);
+    return () => {
+      window.removeEventListener('testConnection', handleTestConnection as EventListener);
+    };
+  }, []);
 
   const autoSave = (key: string, value: string) => {
     localStorage.setItem(key, value);
@@ -95,12 +113,6 @@ export const GloriaTab = () => {
     }
   };
 
-  const openEdgeFunctionLogs = () => {
-    const logsUrl = 'https://supabase.com/dashboard/project/fxhtcdyxmtfyvanqhaty/functions/gloria-api/logs';
-    window.open(logsUrl, '_blank');
-    addLog('Opening Edge Function logs in new tab...', 'info');
-  };
-
   const getStatusIcon = () => {
     switch (connectionStatus) {
       case 'success':
@@ -127,43 +139,25 @@ export const GloriaTab = () => {
     <div className="space-y-6">
       {/* Connection Status */}
       <div className={`rounded-lg border p-4 ${getStatusColor()}`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            {getStatusIcon()}
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">
-                Connection Status
-              </h3>
-              <p className="text-sm text-gray-600">
-                {connectionStatus === 'idle' ? 'Not tested' : connectionStatus === 'success' ? 'Connected' : 'Failed'}
-              </p>
-            </div>
+        <div className="flex items-center space-x-3">
+          {getStatusIcon()}
+          <div>
+            <h3 className="text-sm font-medium text-gray-900">
+              Connection Status
+            </h3>
+            <p className="text-sm text-gray-600">
+              {connectionStatus === 'idle' ? 'Not tested' : connectionStatus === 'success' ? 'Connected' : 'Failed'}
+              {isLoading && ' - Testing...'}
+            </p>
           </div>
-          <button 
-            className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white transition-colors ${
-              isLoading ? 'bg-gray-400 cursor-not-allowed' : 
-              connectionStatus === 'success' ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-900 hover:bg-gray-800'
-            }`}
-            onClick={testGloriaConnection}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Testing...
-              </>
-            ) : (
-              'Test Connection'
-            )}
-          </button>
         </div>
       </div>
 
       {/* Environment Variables */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <div className="flex items-center space-x-3 mb-6">
-          <Database className="w-5 h-5 text-green-600" />
-          <h2 className="text-lg font-semibold text-green-600">Gloria Environment Variables</h2>
+          <span className="font-bold text-green-600">GloriaFood</span>
+          <h2 className="text-lg font-semibold text-green-600">Environment Variables</h2>
         </div>
         
         <div>
@@ -174,27 +168,10 @@ export const GloriaTab = () => {
             type="text"
             value={restaurantKey}
             onChange={(e) => handleRestaurantKeyChange(e.target.value)}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
+            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 sm:text-sm"
             placeholder="Enter Gloria Restaurant Key"
           />
         </div>
-      </div>
-
-      {/* Debugging & Logs */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-green-600">Debugging & Logs</h3>
-          <button 
-            className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-            onClick={openEdgeFunctionLogs}
-          >
-            <ExternalLink className="w-4 h-4 mr-2" />
-            View Edge Function Logs
-          </button>
-        </div>
-        <p className="text-sm text-gray-600">
-          Click the button above to view detailed Edge Function logs in Supabase dashboard for debugging connection issues.
-        </p>
       </div>
 
       {/* Gloria API Test Snippet */}
